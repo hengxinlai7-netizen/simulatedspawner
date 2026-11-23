@@ -1,0 +1,32 @@
+{
+    "required": true,
+    "minVersion": "0.8.5",
+    "package": "com.hengx.simulatedspawner.mixin",
+    "compatibilityLevel": "JAVA_17",
+    "refmap": "simulatedspawner.refmap.json",
+    "mixins": [
+        "ApothSpawnerTileMixin",
+        "ApothSpawnerBlockMixin",
+        "SpawnerLogicExtMixin",
+        "StatModifierMixin",
+        "LootPoolEntryContainerMixin",
+        "LootPoolMixin",
+        "ForgeHooksMixin",
+        "ServerLevelMixin",
+        "EnchantmentMenuMixin",
+        "ApothEnchantmentMenuMixin",
+        "EnchantingRecipeMixin",
+        "AugmentingMenuMixin",
+        "AffixHelperMixin",
+        "LootEntityPropertyConditionMixin",
+        "LootRandomChanceConditionMixin",
+        "LootRandomChanceWithLootingConditionMixin",
+        "MatchToolConditionMixin"
+    ],
+    "client": [
+        "SpawnerJEIPluginMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

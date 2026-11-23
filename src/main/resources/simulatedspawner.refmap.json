@@ -1,0 +1,42 @@
+{
+    "mappings": {
+        "com/hengx/simulatedspawner/mixin/ApothSpawnerTileMixin": {
+            "saveAdditional": "m_183515_",
+            "load": "m_142466_"
+        },
+        "com/hengx/simulatedspawner/mixin/ApothSpawnerBlockMixin": {
+            "use": "m_6227_"
+        },
+        "com/hengx/simulatedspawner/mixin/ServerLevelMixin": {
+            "addFreshEntity": "m_7967_"
+        },
+        "com/hengx/simulatedspawner/mixin/SpawnerLogicExtMixin": {
+            "serverTick": "m_151311_",
+            "Lnet/minecraft/server/level/ServerLevel;tryAddFreshEntityWithPassengers(Lnet/minecraft/world/entity/Entity;)Z": "Lnet/minecraft/server/level/ServerLevel;m_8860_(Lnet/minecraft/world/entity/Entity;)Z",
+            "Lnet/minecraft/server/level/ServerLevel;levelEvent(ILnet/minecraft/core/BlockPos;I)V": "Lnet/minecraft/server/level/ServerLevel;m_46796_(ILnet/minecraft/core/BlockPos;I)V",
+            "Lnet/minecraft/world/entity/Mob;spawnAnim()V": "Lnet/minecraft/world/entity/Mob;m_21373_()V",
+            "Lnet/minecraft/server/level/ServerLevel;noCollision(Lnet/minecraft/world/phys/AABB;)Z": "Lnet/minecraft/server/level/ServerLevel;m_45772_(Lnet/minecraft/world/phys/AABB;)Z"
+        }
+    },
+    "data": {
+        "searge": {
+            "com/hengx/simulatedspawner/mixin/ApothSpawnerTileMixin": {
+                "saveAdditional": "m_183515_",
+                "load": "m_142466_"
+            },
+            "com/hengx/simulatedspawner/mixin/ApothSpawnerBlockMixin": {
+                "use": "m_6227_"
+            },
+            "com/hengx/simulatedspawner/mixin/ServerLevelMixin": {
+                "addFreshEntity": "m_7967_"
+            },
+            "com/hengx/simulatedspawner/mixin/SpawnerLogicExtMixin": {
+                "serverTick": "m_151311_",
+                "Lnet/minecraft/server/level/ServerLevel;tryAddFreshEntityWithPassengers(Lnet/minecraft/world/entity/Entity;)Z": "Lnet/minecraft/server/level/ServerLevel;m_8860_(Lnet/minecraft/world/entity/Entity;)Z",
+                "Lnet/minecraft/server/level/ServerLevel;levelEvent(ILnet/minecraft/core/BlockPos;I)V": "Lnet/minecraft/server/level/ServerLevel;m_46796_(ILnet/minecraft/core/BlockPos;I)V",
+                "Lnet/minecraft/world/entity/Mob;spawnAnim()V": "Lnet/minecraft/world/entity/Mob;m_21373_()V",
+                "Lnet/minecraft/server/level/ServerLevel;noCollision(Lnet/minecraft/world/phys/AABB;)Z": "Lnet/minecraft/server/level/ServerLevel;m_45772_(Lnet/minecraft/world/phys/AABB;)Z"
+            }
+        }
+    }
+}

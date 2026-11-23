@@ -1,0 +1,18 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        { "item": "minecraft:book" },
+        { "item": "minecraft:obsidian" },
+        { "item": "minecraft:obsidian" },
+        { "item": "minecraft:obsidian" },
+        { "item": "minecraft:obsidian" },
+        { "item": "minecraft:obsidian" },
+        { "item": "minecraft:obsidian" },
+        { "item": "minecraft:obsidian" },
+        { "item": "minecraft:obsidian" }
+    ],
+    "result": {
+        "item": "minecraft:enchanted_book",
+        "nbt": "{StoredEnchantments:[{id:\"simulatedspawner:unbreakable\",lvl:1s}]}"
+    }
+}

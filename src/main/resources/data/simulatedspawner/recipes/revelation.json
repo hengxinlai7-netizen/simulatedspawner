@@ -1,0 +1,22 @@
+{
+    "type": "apotheosis:spawner_modifier",
+    "conditions": [
+        {
+            "type": "apotheosis:module",
+            "module": "spawner"
+        },
+        {
+            "type": "forge:mod_loaded",
+            "modid": "enigmaticlegacy"
+        }
+    ],
+    "mainhand": {
+        "item": "enigmaticlegacy:the_acknowledgment"
+    },
+    "stat_changes": [
+        {
+            "id": "simulatedspawner:revelation",
+            "value": true
+        }
+    ]
+}

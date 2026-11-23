@@ -1,0 +1,24 @@
+{
+    "type": "apotheosis:spawner_modifier",
+    "conditions": [
+        {
+            "type": "apotheosis:module",
+            "module": "spawner"
+        }
+    ],
+    "mainhand": {
+        "item": "minecraft:diamond_block"
+    },
+    "offhand": {
+        "item": "minecraft:quartz"
+    },
+    "consumes_offhand": false,
+    "stat_changes": [
+        {
+            "id": "simulatedspawner:bonus_level",
+            "value": -1,
+            "min": 0,
+            "max": 10
+        }
+    ]
+}

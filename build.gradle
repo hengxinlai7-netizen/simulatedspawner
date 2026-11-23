@@ -1,0 +1,132 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+// 供 processResources 展开与 jar manifest 使用
+def mod_authors = 'hengx'
+def mod_description = '为神化(Apotheosis)刷怪笼添加扩展:钻石剑=模拟击杀掉落、钓鱼竿=模拟钓鱼、钻石块=时运/海之眷顾、信标=全特殊条件掉落、启示之证=七咒之戒独特掉落;另含"无法破坏"附魔、捕捉附魔书配方(4鸡蛋+书,可升到3级)、铁栅栏合成刷怪笼,以及捕捉附魔的额外掉蛋效果。'
+
+println "Java: ${System.getProperty('java.version')}, JVM: ${System.getProperty('java.vm.version')} (${System.getProperty('java.vendor')}, ${System.getProperty('java.vm.name')})"
+println "Architecture: ${System.getProperty('os.arch')}"
+
+minecraft {
+    // 官方映射:1.20.1 运行期即使用 Mojang 官方名称
+    mappings channel: mapping_channel, version: mapping_version
+
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                "${mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        client {
+            property 'forge.enabledGameTestNamespaces', mod_id
+            property 'mixin.config', 'simulatedspawner.mixins.json'
+        }
+
+        server {
+            property 'forge.enabledGameTestNamespaces', mod_id
+            property 'mixin.config', 'simulatedspawner.mixins.json'
+            args '--nogui'
+        }
+    }
+}
+
+repositories {
+    maven {
+        name = 'Sponge'
+        url = 'https://repo.spongepowered.org/repository/maven-public/'
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    // Apotheosis 7.4.8 及其运行依赖,仅用于编译(mojmap 名称直接可用),运行时请放进 mods 文件夹
+    compileOnly files('libs/Apotheosis-1.20.1-7.4.8.jar')
+    compileOnly files('libs/Placebo-1.20.1-8.6.3.jar')
+    compileOnly files('libs/ApothicAttributes-1.20.1-1.3.7.jar')
+    compileOnly files('libs/Patchouli-1.20.1-85-FORGE.jar')
+    // Curios:仅用于"启示之证"特性给假玩家临时装备七咒之戒(运行时用 ModList 守卫,缺失也能正常运行)
+    compileOnly files('libs/curios-forge-5.14.1+1.20.1.jar')
+
+    // Mixin 注解处理器(编译期校验 @Mixin 注入目标)
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+// 展开 mods.toml 中的 ${file.jarVersion} 等占位符
+def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta']
+tasks.named('processResources', ProcessResources).configure {
+    var replaceProperties = [
+            minecraft_version: minecraft_version,
+            minecraft_version_range: '[1.20.1,1.20.2)',
+            forge_version: forge_version,
+            forge_version_range: '[47.2.0,)',
+            loader_version_range: '[47,)',
+            mod_id: mod_id,
+            mod_name: '神化扩展',
+            mod_license: 'MIT',
+            mod_version: mod_version,
+            mod_authors: mod_authors,
+            mod_description: mod_description
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(resourceTargets) {
+        expand replaceProperties
+    }
+}
+
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1',
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                // Forge 从 MANIFEST 的这个属性加载 mixin 配置
+                'MixinConfigs'            : 'simulatedspawner.mixins.json'
+        ])
+    }
+    finalizedBy 'reobfJar'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
