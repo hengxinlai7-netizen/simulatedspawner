@@ -75,6 +75,20 @@ public final class SimulationLogic {
         }
     }
 
+    // ---------------------------------------------------------------- 反射缓存
+    // 每次模拟击杀都会走"自定义死亡掉落"与"全局战利品修改器枚举";原实现每次调用都做
+    // Class.forName / getDeclaredMethod / setAccessible —— 这里解析一次后缓存,行为不变
+    // (拿到的仍是同一个 Method,invoke 语义完全相同)。
+
+    /** {@code LivingEntity#dropCustomDeathLoot} 的缓存(解析失败为 null)。 */
+    private static volatile java.lang.reflect.Method CUSTOM_DROPS_CACHE;
+    private static volatile boolean customDropsResolved;
+
+    /** Forge 全局战利品修改器管理器的两个方法缓存(解析失败为 null)。 */
+    private static volatile java.lang.reflect.Method GLM_GET_MANAGER_CACHE;
+    private static volatile java.lang.reflect.Method GLM_GET_ALL_CACHE;
+    private static volatile boolean glmResolved;
+
     private SimulationLogic() {}
 
     /**
@@ -212,20 +226,24 @@ public final class SimulationLogic {
      */
     private static void invokeCustomDeathDrops(LivingEntity living, ServerLevel level) {
         try {
-            java.lang.reflect.Method target = null;
-            for (String name : new String[] { "dropCustomDeathLoot", "m_7472_" }) {
-                try {
-                    target = LivingEntity.class.getDeclaredMethod(name, DamageSource.class, int.class, boolean.class);
-                    break;
+            java.lang.reflect.Method target = CUSTOM_DROPS_CACHE;
+            if (!customDropsResolved) {
+                customDropsResolved = true;
+                for (String name : new String[] { "dropCustomDeathLoot", "m_7472_" }) {
+                    try {
+                        target = LivingEntity.class.getDeclaredMethod(name, DamageSource.class, int.class, boolean.class);
+                        target.setAccessible(true);
+                        break;
+                    }
+                    catch (NoSuchMethodException ignored) {
+                        // 尝试下一个名字
+                    }
                 }
-                catch (NoSuchMethodException ignored) {
-                    // 尝试下一个名字
-                }
+                CUSTOM_DROPS_CACHE = target;
             }
             if (target == null) {
                 return;
             }
-            target.setAccessible(true);
             ServerPlayer fakePlayer = FakePlayerFactory.getMinecraft(level);
             DamageSource source = level.damageSources().playerAttack(fakePlayer);
             target.invoke(living, source, SimConfig.SIMULATED_LOOTING.get(), true);
@@ -494,11 +512,30 @@ public final class SimulationLogic {
     /** 反射获取 Forge 的全局战利品修改器列表;不可用时返回 null。 */
     private static Iterable<?> listLootModifiers() {
         try {
-            Class<?> handler = Class.forName("net.minecraftforge.common.ForgeInternalHandler");
-            java.lang.reflect.Method getManager = handler.getDeclaredMethod("getLootModifierManager");
-            getManager.setAccessible(true);
+            java.lang.reflect.Method getManager = GLM_GET_MANAGER_CACHE;
+            java.lang.reflect.Method getAll = GLM_GET_ALL_CACHE;
+            if (!glmResolved) {
+                glmResolved = true;
+                try {
+                    Class<?> handler = Class.forName("net.minecraftforge.common.ForgeInternalHandler");
+                    getManager = handler.getDeclaredMethod("getLootModifierManager");
+                    getManager.setAccessible(true);
+                    Object probeManager = getManager.invoke(null);
+                    getAll = probeManager.getClass().getMethod("getAllLootMods");
+                    GLM_GET_MANAGER_CACHE = getManager;
+                    GLM_GET_ALL_CACHE = getAll;
+                }
+                catch (Throwable t) {
+                    GLM_GET_MANAGER_CACHE = null;
+                    GLM_GET_ALL_CACHE = null;
+                    SimulatedSpawner.LOGGER.debug("无法枚举全局战利品修改器,退回 Forge 链式处理", t);
+                    return null;
+                }
+            }
+            if (getManager == null || getAll == null) {
+                return null;
+            }
             Object manager = getManager.invoke(null);
-            java.lang.reflect.Method getAll = manager.getClass().getMethod("getAllLootMods");
             Object modsObj = getAll.invoke(manager);
             return modsObj instanceof Iterable<?> mods ? mods : null;
         }

@@ -45,6 +45,13 @@ public class ScavengerBonusHandler {
         if (event.getAmount() < health) {
             return; // 这一击不足以打死
         }
+        // 1.7.10:这个表只在"受伤 -> 掉落"之间做一次标记;若目标被其它方式清掉(区块卸载、
+        // /kill、被其它模组移除),条目会一直留着。超过阈值时按游戏时间清理陈旧条目,避免无限增长。
+        // 清理阈值远大于"受伤到掉落"的实际间隔,不影响任何判定结果。
+        if (ONE_SHOT_KILLS.size() > 256) {
+            long now = mob.level().getGameTime();
+            ONE_SHOT_KILLS.entrySet().removeIf(e -> now - e.getValue() > 200L);
+        }
         ONE_SHOT_KILLS.put(mob.getUUID(), mob.level().getGameTime());
     }
 
